@@ -1,8 +1,8 @@
 ## ByPass-MosaicX509Setting.ps1
 ## Author:      mochen@foss.dk
 ## Created:     3/30/2023
-## Modified:    3/30/2023
-## Version:     1.0.0.0
+## Modified:    3/31/2023
+## Version:     1.0.0.1
 
 [CmdletBinding()]
 param (
@@ -11,13 +11,17 @@ param (
     $ConfigFile
 )
 
-[string]$xmlFilePath = [System.IO.Path]::Join($(Get-Location | Select-Object -ExpandProperty Path), $ConfigFile)
+[string]$xmlFilePath = ""
 
-if(-not [System.IO.File]::Exists($xmlFilePath))
-{
-    Write-Warning "`"$xmlFilePath`" does not exist. Exiting..."
-    Exit
+try {
+    $xmlFilePath = Resolve-Path $ConfigFile -ErrorAction Stop | Select-Object -ExpandProperty Path
 }
+catch {
+    Write-Warning "File `"$ConfigFile`" does not exist. It is moved, deleted, or invalid.."
+    Write-Warning "Exiting..."
+    Exit;
+}
+
 $xml = New-Object xml
 try {
     $xml.Load($xmlFilePath)
@@ -47,7 +51,7 @@ for($i=0;$i -lt $oldVal.Length; $i++)
 {
     Write-Host "[$i] $($oldVal[$i])"
 }
-
+Write-Host "`r`n`r`n"
 if ($needModification) {
     "Modification is needed." | Write-Host
     $answer = ""
@@ -72,15 +76,14 @@ if ($needModification) {
     }
 }
 else {
-    Write-Host "`r`n`r`n"
-    Write-Host "No Need to change anything for the x509Certificate by-pass..."
+    Write-Host "Setting already active, No Need to change anything for the x509 by-pass..."
     Write-Host "Exiting..."
 }
 # SIG # Begin signature block
 # MIIGFgYJKoZIhvcNAQcCoIIGBzCCBgMCAQExDzANBglghkgBZQMEAgEFADB5Bgor
 # BgEEAYI3AgEEoGswaTA0BgorBgEEAYI3AgEeMCYCAwEAAAQQH8w7YFlLCE63JNLG
-# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCB7R61ISgOg2H8N
-# pnZr5Z89vbOVsZYT6ZvzPDbFiIkPoqCCA2AwggNcMIICRKADAgECAhAiXJCsMViY
+# KX7zUQIBAAIBAAIBAAIBAAIBADAxMA0GCWCGSAFlAwQCAQUABCA9BKe5e+8Ga6KC
+# kMrYq4n3l2CnbPvvj3hiS6nYaGp5cKCCA2AwggNcMIICRKADAgECAhAiXJCsMViY
 # t0/OhWs+Jt88MA0GCSqGSIb3DQEBCwUAMEYxJTAjBgNVBAMMHFBvd2VyU2hlbGwg
 # Q29kZSBTaWduaW5nIENlcnQxHTAbBgkqhkiG9w0BCQEWDm1vY2hlbkBmb3NzLmRr
 # MB4XDTIzMDMzMDEwNDE0OFoXDTI0MDMzMDExMDE0OFowRjElMCMGA1UEAwwcUG93
@@ -103,11 +106,11 @@ else {
 # Dm1vY2hlbkBmb3NzLmRrAhAiXJCsMViYt0/OhWs+Jt88MA0GCWCGSAFlAwQCAQUA
 # oIGEMBgGCisGAQQBgjcCAQwxCjAIoAKAAKECgAAwGQYJKoZIhvcNAQkDMQwGCisG
 # AQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUwLwYJKoZIhvcN
-# AQkEMSIEIBpwmUoDBLEk1hbIfT9SoSzkC/O71nzoHnDqqAJJBvGFMA0GCSqGSIb3
-# DQEBAQUABIIBAGl258bgqzDGiJGBxuph6zdD6GCn87wjvAEAt5h2/XIdlWVzaQlP
-# pq9ob/ijvWRHInpza596/Co+o1d0ZXcKph0/n6Zh9C3ZIo61a1cQn3tmpK54xqek
-# NyBTJ6piqy2SovAYzdETGl75dp05BnsIE1W33RBZwO+1xYCQOXhYigJc/ddoWEld
-# vMA2y3GA+wQwSEPILVI/aEIQcZym7aYJbTuqljuhvTLM9B4dSz6o8Oc4Zud8x/Yp
-# /pge1I/FXYb3XCMAD7DknKXfTjNzb0PHTcHEObL4LK8gDwZWOiqEaXdYVuCC6LCM
-# j3YCH8DRr4+BADqg8sIzAdVnri2Ufm5L5QQ=
+# AQkEMSIEIAIvKpJXf2mj1DGdLe3zQjZj3KJ0lNhpjdTCxupTLyw7MA0GCSqGSIb3
+# DQEBAQUABIIBAKPS4Fa2GH9meaeVHxjqQg084dP3sIGQcApWckul83OS9jjSThrh
+# KZGrCQE5S5pxLakpaTlaZnRwM1o8RH9/46aZxYPC4396mTNxuuj0V03LylGcxam0
+# UXudz6VjU0CcJGeU2/7vUpJ+RzxKS2BWKBEla0It0BUTrUUpi0qe6J8e8EUmJhd9
+# 8zA+GxPOtRTy+FoTH7FywRexBcJRfr3U/YXHAfct+i1Dnw+KUPRi4z+oxsBAnmSg
+# 4F63ti6DKQiYSr7HxRUPmdF0VG9MidQecJ2wUp4UZ2YbEhDDkO9hgm6K+IvIEqsL
+# xzzKu6V2sTJIdqhoq72gJR3ntrRhNzu+Hqw=
 # SIG # End signature block
