@@ -10,9 +10,7 @@ param (
     [string]
     $ConfigFile
 )
-
 [string]$xmlFilePath = ""
-
 try {
     $xmlFilePath = Resolve-Path $ConfigFile -ErrorAction Stop | Select-Object -ExpandProperty Path
 }
@@ -21,7 +19,6 @@ catch {
     Write-Warning "Exiting..."
     Exit;
 }
-
 $xml = New-Object xml
 try {
     $xml.Load($xmlFilePath)
@@ -38,14 +35,12 @@ if($oldstring.Length -eq 0)
     Write-Warning "Please check if:`r`n$xmlFilePath`r`n...is a valid mosaic.exe.config file."
     Exit
 }
-
 $oldstring = $oldstring -replace '\s', ''
 [string[]]$oldVal = $oldstring -split ";"
 Write-Debug $($oldVal -join ";")
 $x509ByPass = "Switch.System.IdentityModel.DisableCngCertificates=false";
 Write-Host "Searching for `"$x509ByPass`"..."
 [bool]$needModification = $oldVal -notcontains $x509ByPass
-
 Write-Host "...in Current AppContextSwitchOverrides Setting:"
 for($i=0;$i -lt $oldVal.Length; $i++)
 {
@@ -64,14 +59,12 @@ if ($needModification) {
         Write-Host "Nothing is done. Exiting..."
         Exit
     }
-
     if($answer -imatch "yes")
     {
         Write-Host "Changing Setting..."
         $oldVal += $x509ByPass;
         $xml.Configuration.Runtime.AppContextSwitchOverrides.Value = $oldVal -join ";"
         $xml.Save($xmlFilePath);
-
         Write-Host "Done."
     }
 }
